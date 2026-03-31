@@ -2,19 +2,45 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 
+class Pokemon { // <-- Nombre de la clase
+public:
+    std::string nombre;
+    int nivel;
+    int vida;
+    int vidamax;
+    sf::Texture textura; // Faltaba el nombre de la variable
+    sf::Sprite sprite;   // Faltaba el nombre de la variable
+
+    // EL CONSTRUCTOR DEBE LLAMARSE IGUAL QUE LA CLASE: PokemonUser
+    Pokemon(std::string n, int lvl, int vMax, std::string rutaArchivo) {
+        nombre = n;
+        nivel = lvl;
+        vidamax = vMax;
+        vida = vMax;
+
+        if (textura.loadFromFile(rutaArchivo)) {
+            textura.setSmooth(false);
+            sprite.setTexture(textura); // Ahora 'sprite' existe
+        }
+    }
+
+    void dibujar(sf::RenderWindow& ventana) {
+        ventana.draw(sprite);
+    }
+};
+
 int main() {
     // Crear la ventana (ancho, alto, título)
     sf::RenderWindow ventana(sf::VideoMode(800, 600), "Pokemon Battle Simulator");
     
+	Pokemon miCharmander("Charmander", 5, 200, "sprite/charmander_back.png");
+	Pokemon enemyInstance("Bulbasaur", 5, 200, "sprite/pikachu_front.png");
+
     //Cargar Texturas
     
     sf::Texture backgroundBattle;
     backgroundBattle.loadFromFile("sprite/background.png");
     backgroundBattle.setSmooth(false);
-    
-    sf::Texture pokemonFront;
-    pokemonFront.loadFromFile("sprite/pikachu_front.png");
-    pokemonFront.setSmooth(false);
     
     sf::Texture pokemonBack;
     pokemonBack.loadFromFile("sprite/charmander_back.png");
@@ -40,11 +66,11 @@ int main() {
     backgroundBattle_sprite.setPosition(0.0f, 0.0f);
     backgroundBattle_sprite.setScale(3.5f, 4.2f);
     
-    sf::Sprite pokemonFront_Sprite(pokemonFront); //Pokemon Frontal Sprite
+    sf::Sprite pokemonFront_Sprite(enemyInstance.textura); //Pokemon Frontal Sprite
     pokemonFront_Sprite.setPosition(500.0f, 65.0f);
     pokemonFront_Sprite.setScale(4.0f, 4.0f);
     
-    sf::Sprite pokemonBack_Sprite(pokemonBack); //Pokemon trasero Sprite
+    sf::Sprite pokemonBack_Sprite(miCharmander.textura); //Pokemon trasero Sprite
     pokemonBack_Sprite.setPosition(40.0f, 240.0f);
     pokemonBack_Sprite.setScale(4.0f, 4.0f);
     
@@ -77,14 +103,14 @@ int main() {
     //Texto
     
     sf::Text enemyNameText; //Texto para Nombre del Enemigo
-    enemyNameText.setString("Pikachu");
+    enemyNameText.setString(enemyInstance.nombre);
     enemyNameText.setFont(fuente);
     enemyNameText.setCharacterSize(37);
     enemyNameText.setFillColor(sf::Color::Black);
     enemyNameText.setPosition(70.0f, 50.0f);
     
     sf::Text userNameText; //Texto para Nombre del Usuario
-    userNameText.setString("Charmander");
+    userNameText.setString(miCharmander.nombre);
     userNameText.setFont(fuente);
     userNameText.setCharacterSize(37);
     userNameText.setFillColor(sf::Color::Black);
@@ -96,6 +122,15 @@ int main() {
     infoText.setCharacterSize(37);
     infoText.setFillColor(sf::Color::White);
     infoText.setPosition(40.0f, 480.0f);
+    
+     sf::Text enemyLevel; //Texto para el nivel del enemigo
+    enemyLevel.setString("25");
+    enemyLevel.setFont(fuente);
+    enemyLevel.setCharacterSize(34);
+    enemyLevel.setFillColor(sf::Color::Black);
+    enemyLevel.setPosition(365.0f, 55.0f);
+    
+    
     
     // Loop principal de la aplicación
     while (ventana.isOpen()) {
@@ -135,6 +170,7 @@ int main() {
 		ventana.draw(enemyNameText);
 		ventana.draw(userNameText);
 		ventana.draw(infoText);
+		ventana.draw(enemyLevel);
 				
         
         // Mostrar lo dibujado en pantalla
