@@ -68,6 +68,34 @@ int main() {
     pokemonBattleWild.openFromFile("music/battle.ogg");
     pokemonBattleWild.setLoop(true);
     pokemonBattleWild.play();
+
+	//Fuente
+	
+	sf::Font fuente;
+	fuente.loadFromFile("Pokemon.ttf");
+
+    //Texto
+    
+    sf::Text enemyNameText; //Texto para Nombre del Enemigo
+    enemyNameText.setString("Pikachu");
+    enemyNameText.setFont(fuente);
+    enemyNameText.setCharacterSize(37);
+    enemyNameText.setFillColor(sf::Color::Black);
+    enemyNameText.setPosition(70.0f, 50.0f);
+    
+    sf::Text userNameText; //Texto para Nombre del Usuario
+    userNameText.setString("Charmander");
+    userNameText.setFont(fuente);
+    userNameText.setCharacterSize(37);
+    userNameText.setFillColor(sf::Color::Black);
+    userNameText.setPosition(485.0f, 320.0f);
+    
+     sf::Text infoText; //Texto para info
+    infoText.setString("Charmander uso Mordisco\nFue super efectivo!");
+    infoText.setFont(fuente);
+    infoText.setCharacterSize(37);
+    infoText.setFillColor(sf::Color::White);
+    infoText.setPosition(40.0f, 480.0f);
     
     // Loop principal de la aplicación
     while (ventana.isOpen()) {
@@ -104,6 +132,9 @@ int main() {
 		ventana.draw(bar_sprite);
 		ventana.draw(enemyBar_sprite);
 		ventana.draw(userBar_sprite);
+		ventana.draw(enemyNameText);
+		ventana.draw(userNameText);
+		ventana.draw(infoText);
 				
         
         // Mostrar lo dibujado en pantalla
