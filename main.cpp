@@ -10,6 +10,8 @@ public:
     int vidamax;
     sf::Texture textura; // Faltaba el nombre de la variable
     sf::Sprite sprite;   // Faltaba el nombre de la variable
+    std::string textoVida;
+    std::string textoNivel;
 
     // EL CONSTRUCTOR DEBE LLAMARSE IGUAL QUE LA CLASE: PokemonUser
     Pokemon(std::string n, int lvl, int vMax, std::string rutaArchivo) {
@@ -17,6 +19,8 @@ public:
         nivel = lvl;
         vidamax = vMax;
         vida = vMax;
+        textoVida = std::to_string(vida) + " / " + std::to_string(vidamax);
+        textoNivel = std::to_string(nivel);
 
         if (textura.loadFromFile(rutaArchivo)) {
             textura.setSmooth(false);
@@ -34,7 +38,7 @@ int main() {
     sf::RenderWindow ventana(sf::VideoMode(800, 600), "Pokemon Battle Simulator");
     
 	Pokemon miCharmander("Charmander", 5, 200, "sprite/charmander_back.png");
-	Pokemon enemyInstance("Bulbasaur", 5, 200, "sprite/pikachu_front.png");
+	Pokemon enemyInstance("Pikachu", 67, 200, "sprite/pikachu_front.png");
 
     //Cargar Texturas
     
@@ -124,12 +128,18 @@ int main() {
     infoText.setPosition(40.0f, 480.0f);
     
      sf::Text enemyLevel; //Texto para el nivel del enemigo
-    enemyLevel.setString("25");
+    enemyLevel.setString(enemyInstance.textoNivel);
     enemyLevel.setFont(fuente);
     enemyLevel.setCharacterSize(34);
     enemyLevel.setFillColor(sf::Color::Black);
     enemyLevel.setPosition(365.0f, 55.0f);
     
+    sf::Text userVida; //Texto para la vida del usuario
+    userVida.setString(miCharmander.textoVida);
+    userVida.setFont(fuente);
+    userVida.setCharacterSize(28);
+    userVida.setFillColor(sf::Color::Black);
+    userVida.setPosition(645.0f, 390.0f);
     
     
     // Loop principal de la aplicación
@@ -141,6 +151,18 @@ int main() {
             if (evento.type == sf::Event::Closed) {
                 ventana.close();
             }
+            
+            // Evento de Debug: Presionar Espacio
+    if (evento.type == sf::Event::KeyPressed) {
+        if (evento.key.code == sf::Keyboard::Space) {
+            // Obtenemos la posición del mouse RELATIVA a la ventana
+            sf::Vector2i mousePos = sf::Mouse::getPosition(ventana);
+            
+            // Imprimimos en la consola de Linux
+            std::cout << "[DEBUG] Mouse Pos -> X: " << mousePos.x 
+                      << " | Y: " << mousePos.y << std::endl;
+        }
+    }
             
             // Si presiona la tecla ESC
             if (evento.type == sf::Event::KeyPressed) {
@@ -171,6 +193,7 @@ int main() {
 		ventana.draw(userNameText);
 		ventana.draw(infoText);
 		ventana.draw(enemyLevel);
+		ventana.draw(userVida);
 				
         
         // Mostrar lo dibujado en pantalla
