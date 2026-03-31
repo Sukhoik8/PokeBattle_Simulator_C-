@@ -10,12 +10,16 @@ int main() {
     
     sf::Texture backgroundBattle;
     backgroundBattle.loadFromFile("sprite/background.png");
+    backgroundBattle.setSmooth(false);
     
     sf::Texture pokemonFront;
     pokemonFront.loadFromFile("sprite/pikachu_front.png");
+    pokemonFront.setSmooth(false);
     
     sf::Texture pokemonBack;
     pokemonBack.loadFromFile("sprite/charmander_back.png");
+    pokemonBack.setSmooth(false);
+
     
     
     //Texture HUD
