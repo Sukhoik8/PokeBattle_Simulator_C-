@@ -96,6 +96,16 @@ int main() {
 	hpenemygreen.setSize(sf::Vector2f(hpbar_total_ancho, hpbar_total_altura));
 	hpenemygreen.setPosition(193.0f, 106.0f);
 	hpenemygreen.setFillColor(sf::Color::Green);
+	
+	sf::RectangleShape hpuserblank;
+	hpuserblank.setSize(sf::Vector2f(hpbar_total_ancho, hpbar_total_altura));
+	hpuserblank.setPosition(564.0f, 364.0f);
+	hpuserblank.setFillColor(sf::Color::Black);
+	
+	sf::RectangleShape hpusergreen;
+	hpusergreen.setSize(sf::Vector2f(hpbar_total_ancho, hpbar_total_altura));
+	hpusergreen.setPosition(564.0f, 364.0f);
+	hpusergreen.setFillColor(sf::Color::Green);
 
     //Cargar Texturas
     
@@ -142,8 +152,8 @@ int main() {
     enemyBar_sprite.setScale(4.0f, 4.0f);
     
     sf::Sprite userBar_sprite(userBar); //Bara del player
-    userBar_sprite.setPosition(430.0f, 300.0f);
-    userBar_sprite.setScale(3.5f, 3.5f);
+    userBar_sprite.setPosition(372.0f, 280.0f);
+    userBar_sprite.setScale(4.0f, 4.0f);
     
     sf::Sprite bar_sprite(bar); //Barra de Fondo
     bar_sprite.setPosition(0.0f, 453.0f);
@@ -175,7 +185,7 @@ int main() {
     userNameText.setFont(fuente);
     userNameText.setCharacterSize(37);
     userNameText.setFillColor(sf::Color::Black);
-    userNameText.setPosition(485.0f, 320.0f);
+    userNameText.setPosition(437.0f, 310.0f);
     
      sf::Text infoText; //Texto para info
     infoText.setString(userInstance.nombre + " anda esperando tu eleccion.\nPresiona los numeros del 1 al 4");
@@ -203,7 +213,10 @@ int main() {
     userLevel.setFont(fuente);
     userLevel.setCharacterSize(34);
     userLevel.setFillColor(sf::Color::Black);
-    userLevel.setPosition(750.0f, 325.0f);
+    userLevel.setPosition(739.0f, 317.0f);
+    
+    sf::Clock relojEnemigo;
+    bool relojReiniciado = false;
     
     
     // Loop principal de la aplicación
@@ -211,10 +224,19 @@ int main() {
         // Procesar todos los eventos
         sf::Event evento;
         while (ventana.pollEvent(evento)) {
+			/*
+			 ###################
+			 
+			 EVENTO POLL
+			 
+			 
+			 ###################
+			  */
             // Si el usuario cierra la ventana
             if (evento.type == sf::Event::Closed) {
                 ventana.close();
             }
+            
             
             // Evento de Debug: Presionar Espacio
     if (evento.type == sf::Event::KeyPressed) {
@@ -227,6 +249,7 @@ int main() {
                       << " | Y: " << mousePos.y << std::endl;
         }
         
+        
         if (evento.type == sf::Event::KeyPressed){ //Checa si se presiono una tecla
 			if (estado_Actual == TURNO_JUGADOR){ //Checa si es mi turno
 				if (evento.key.code == sf::Keyboard::Num1){ //Checa si se presiono la tecla 1
@@ -234,6 +257,13 @@ int main() {
 					enemyInstance.recibirDanio(30, hpenemygreen);
 					
 					infoText.setString(userInstance.nombre + " ha utilizado aranazo.");
+					if (enemyInstance.vida > 0){
+					estado_Actual = TURNO_ENEMIGO;
+				} else {
+					estado_Actual = FIN_COMBATE;
+					infoText.setString(enemyInstance.nombre + " Se ha debilitado\nHas ganado.");
+					
+				}
 					
 					
 					
@@ -243,11 +273,25 @@ int main() {
 					enemyInstance.recibirDanio(0, hpenemygreen);
 					
 					infoText.setString(userInstance.nombre + " ha utilizado Grunido.");
+					if (enemyInstance.vida > 0){
+					estado_Actual = TURNO_ENEMIGO;
+				} else {
+					estado_Actual = FIN_COMBATE;
+					infoText.setString(enemyInstance.nombre + " Se ha debilitado\nHas ganado.");
+					
+				}
 				} else if (evento.key.code == sf::Keyboard::Num3){ //Checa si se presiono la tecla 3
 					
 					enemyInstance.recibirDanio(80, hpenemygreen);
 					
 					infoText.setString(userInstance.nombre + " ha utilizado Ascuas.\nEs super efectivo.");
+					if (enemyInstance.vida > 0){
+					estado_Actual = TURNO_ENEMIGO;
+				} else {
+					estado_Actual = FIN_COMBATE;
+					infoText.setString(enemyInstance.nombre + " Se ha debilitado\nHas ganado.");
+					
+				}
 				}
 				
 				
@@ -269,7 +313,58 @@ int main() {
                     ventana.close();
                 }
             }
+            
+            
+            
+            
+           
+				
+				
+				
+				
+			}
+			
+			// TURNO DE RIVAL
+            
+			
+			 if (estado_Actual == TURNO_ENEMIGO){
+				
+				if (!relojReiniciado) {
+					relojEnemigo.restart();
+					relojReiniciado = true;
+				}
+				
+				if (relojEnemigo.getElapsedTime().asSeconds() >= 1.5f) {
+				
+				userInstance.recibirDanio(30, hpusergreen);
+				infoText.setString(enemyInstance.nombre + " ha utilizado Impactrueno.");
+				relojReiniciado = false;
+				if (userInstance.vida > 0){
+				estado_Actual = TURNO_JUGADOR;
+			} else {
+				estado_Actual = FIN_COMBATE;
+				infoText.setString(userInstance.nombre + " se ha debilitado\nHas perdido");
+			}
+
+				
+			}
+			
+			
         }
+        
+        if (estado_Actual == FIN_COMBATE){
+				
+				if (!relojReiniciado) {
+					relojEnemigo.restart();
+					relojReiniciado = true;
+				}
+				
+				if (relojEnemigo.getElapsedTime().asSeconds() >= 5.0f){
+					std::cout<<"Esto llega aqui";
+					ventana.close();
+				}
+				
+			}
         
         // Limpiar la ventana con un color
         ventana.clear(sf::Color(50, 100, 150));  // Azul grisáceo
@@ -296,6 +391,8 @@ int main() {
 		ventana.draw(userLevel);
 		ventana.draw(hpenemyblank);
 		ventana.draw(hpenemygreen);
+		ventana.draw(hpuserblank);
+		ventana.draw(hpusergreen);
 				
         
         // Mostrar lo dibujado en pantalla
