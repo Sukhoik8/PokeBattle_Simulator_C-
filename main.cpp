@@ -2,9 +2,9 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 
-enum StateMachine {TURNO_JUGADOR, MENSAJE_ATAQUE, TURNO_ENEMIGO, FIN_COMBATE};
+enum StateMachine {TURNO_JUGADOR, MENSAJE_ATAQUE, TURNO_ENEMIGO, FIN_COMBATE}; //Estados del State Machine
 
-float hpbar_ancho;
+float hpbar_ancho; //Variables de el tamaño de la barra hp del usuario y el enemigo, no tocar
 const float hpbar_total_ancho = 193.0f;
 const float hpbar_total_altura = 12.0f;
 
@@ -14,19 +14,28 @@ public:
     int nivel;
     int vida;
     int vidamax;
+    int atk;
+    int def;
+    int vel;
+    int potencia; //El daño que quitara
     sf::Texture textura; // Faltaba el nombre de la variable
     sf::Sprite sprite;   // Faltaba el nombre de la variable
     std::string textoVida;
     std::string textoNivel;
+    int danohecho; //Para cuanto daño recibira el enemigo
 
     // EL CONSTRUCTOR DEBE LLAMARSE IGUAL QUE LA CLASE: PokemonUser
-    Pokemon(std::string n, int lvl, int vMax, std::string rutaArchivo) {
+    Pokemon(std::string n, int lvl, int vMax, std::string rutaArchivo, int atq, int defi, int speedi) {
         nombre = n;
         nivel = lvl;
         vidamax = vMax;
         vida = vMax;
-        textoVida = std::to_string(vida) + " / " + std::to_string(vidamax);
-        textoNivel = std::to_string(nivel);
+        textoVida = std::to_string(vida) + " / " + std::to_string(vidamax); //para texto de las vidas ejemp 200 / 200
+        textoNivel = std::to_string(nivel); //texto para nivel
+        atk = atq;
+        def = defi;
+        vel = speedi;
+        
 
         if (textura.loadFromFile(rutaArchivo)) {
             textura.setSmooth(false);
@@ -45,6 +54,8 @@ public:
     vida -= cantidad;
     if (vida < 0) vida = 0;
 
+
+
     // Actualizamos el texto
     textoVida = std::to_string(vida) + " / " + std::to_string(vidamax);
 
@@ -60,6 +71,18 @@ public:
     else if (porcentaje < 0.5f) barraVisual.setFillColor(sf::Color::Yellow);
 }
 
+	void CalcularDanio(std::string ataque, int potenciaatk, int defensaenemiga, int ataqueusuario, int nivelusuario){
+		//Funcion para calcular daño
+		float parte1 = (2.0f * nivelusuario / 5.0f) + 2;
+		float parte2 = (parte1 * potenciaatk * (static_cast<float>(ataqueusuario) / defensaenemiga));
+		
+		int danoFinal = static_cast<int>((parte2 / 50.0f) + 2.0f);
+		
+		danohecho = danoFinal;
+		
+		
+	}
+
     void dibujar(sf::RenderWindow& ventana) {
         ventana.draw(sprite);
     }
@@ -72,14 +95,21 @@ int main() {
     sf::RenderWindow ventana(sf::VideoMode(800, 600), "Pokemon Battle Simulator");
     
     // Creacion de las CLASES
-	Pokemon userInstance("Charmander", 55, 200, "sprite/charmander_back.png");
-	Pokemon enemyInstance("Pikachu", 37, 250, "sprite/pikachu_front.png");
+	Pokemon userInstance("Charmander", 5, 18, "sprite/charmander_back.png", 10, 8, 16);
+	Pokemon enemyInstance("Squirtle", 5, 19, "sprite/squirtle_front.png", 9, 9, 14);
 	
 	
-	
+	StateMachine estado_Actual;
 	//Variable Enum de State Machine
 	
-	StateMachine estado_Actual = TURNO_JUGADOR;
+	if (userInstance.vel > enemyInstance.vel){
+	
+	estado_Actual = TURNO_JUGADOR;
+	
+} else {
+		estado_Actual = TURNO_ENEMIGO;
+
+}
 	
 	//Variable Const 
 	
@@ -87,22 +117,22 @@ int main() {
 	
 	//Rectangulo HP BAR
 	
-	sf::RectangleShape hpenemyblank;
+	sf::RectangleShape hpenemyblank; //Rectangulo en blanco del enemigo
 	hpenemyblank.setSize(sf::Vector2f(hpbar_total_ancho, hpbar_total_altura));
 	hpenemyblank.setPosition(193.0f, 106.0f);
 	hpenemyblank.setFillColor(sf::Color::Black);
 	
-	sf::RectangleShape hpenemygreen;
+	sf::RectangleShape hpenemygreen; //Rectangulo en verde del enemigo
 	hpenemygreen.setSize(sf::Vector2f(hpbar_total_ancho, hpbar_total_altura));
 	hpenemygreen.setPosition(193.0f, 106.0f);
 	hpenemygreen.setFillColor(sf::Color::Green);
 	
-	sf::RectangleShape hpuserblank;
+	sf::RectangleShape hpuserblank; //Rectangulo en blanco del usuario
 	hpuserblank.setSize(sf::Vector2f(hpbar_total_ancho, hpbar_total_altura));
 	hpuserblank.setPosition(564.0f, 364.0f);
 	hpuserblank.setFillColor(sf::Color::Black);
 	
-	sf::RectangleShape hpusergreen;
+	sf::RectangleShape hpusergreen; //Rectangulo en verde del usuario
 	hpusergreen.setSize(sf::Vector2f(hpbar_total_ancho, hpbar_total_altura));
 	hpusergreen.setPosition(564.0f, 364.0f);
 	hpusergreen.setFillColor(sf::Color::Green);
@@ -188,7 +218,11 @@ int main() {
     userNameText.setPosition(437.0f, 310.0f);
     
      sf::Text infoText; //Texto para info
+     if (estado_Actual == TURNO_JUGADOR){
     infoText.setString(userInstance.nombre + " anda esperando tu eleccion.\nPresiona los numeros del 1 al 4");
+} else {
+	infoText.setString(enemyInstance.nombre + " espera para atacar.");
+}
     infoText.setFont(fuente);
     infoText.setCharacterSize(37);
     infoText.setFillColor(sf::Color::White);
@@ -249,12 +283,16 @@ int main() {
                       << " | Y: " << mousePos.y << std::endl;
         }
         
-        
+        /*##########ATAQUE DEL USUARIO#############
+         *  
+         ##########################################*/
         if (evento.type == sf::Event::KeyPressed){ //Checa si se presiono una tecla
 			if (estado_Actual == TURNO_JUGADOR){ //Checa si es mi turno
+				//ATAQUE 1 DEL USUARIO
 				if (evento.key.code == sf::Keyboard::Num1){ //Checa si se presiono la tecla 1
 					
-					enemyInstance.recibirDanio(30, hpenemygreen);
+					userInstance.CalcularDanio("Aranazo", 40, enemyInstance.def, userInstance.atk, userInstance.nivel);
+					enemyInstance.recibirDanio(userInstance.danohecho, hpenemygreen);
 					
 					infoText.setString(userInstance.nombre + " ha utilizado aranazo.");
 					if (enemyInstance.vida > 0){
@@ -267,12 +305,20 @@ int main() {
 					
 					
 					
-					
+					//ATAQUE 2 DEL USUARIO
 				} else if (evento.key.code == sf::Keyboard::Num2){ //Checa si se presiono la tecla 2
 					
 					enemyInstance.recibirDanio(0, hpenemygreen);
+					enemyInstance.atk -= 2;
+					if (enemyInstance.atk > 1){   // El ataque no puede ser menor a 3
 					
-					infoText.setString(userInstance.nombre + " ha utilizado Grunido.");
+					infoText.setString(userInstance.nombre + " ha utilizado Grunido.\nEl ataque de " + enemyInstance.nombre + " ha bajado.");
+				} else {
+					enemyInstance.atk = 1;
+					infoText.setString(userInstance.nombre + " ha utilizado Grunido.\nEl ataque de " + enemyInstance.nombre + " no puede bajar mas.");
+
+					
+				}
 					if (enemyInstance.vida > 0){
 					estado_Actual = TURNO_ENEMIGO;
 				} else {
@@ -280,9 +326,11 @@ int main() {
 					infoText.setString(enemyInstance.nombre + " Se ha debilitado\nHas ganado.");
 					
 				}
+				//ATAQUE 3 DEL USUARIO
 				} else if (evento.key.code == sf::Keyboard::Num3){ //Checa si se presiono la tecla 3
 					
-					enemyInstance.recibirDanio(80, hpenemygreen);
+					userInstance.CalcularDanio("Ascuas", 60, enemyInstance.def, userInstance.atk, userInstance.nivel);
+					enemyInstance.recibirDanio(userInstance.danohecho, hpenemygreen);
 					
 					infoText.setString(userInstance.nombre + " ha utilizado Ascuas.\nEs super efectivo.");
 					if (enemyInstance.vida > 0){
@@ -336,8 +384,10 @@ int main() {
 				
 				if (relojEnemigo.getElapsedTime().asSeconds() >= 1.5f) {
 				
-				userInstance.recibirDanio(30, hpusergreen);
-				infoText.setString(enemyInstance.nombre + " ha utilizado Impactrueno.");
+				enemyInstance.CalcularDanio("Placaje", 40, userInstance.def, enemyInstance.atk, enemyInstance.nivel);
+				userInstance.recibirDanio(enemyInstance.danohecho, hpusergreen);
+				userVida.setString(userInstance.textoVida);
+				infoText.setString(enemyInstance.nombre + " ha utilizado Placaje.");
 				relojReiniciado = false;
 				if (userInstance.vida > 0){
 				estado_Actual = TURNO_JUGADOR;
